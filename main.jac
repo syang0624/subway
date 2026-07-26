@@ -1,6 +1,5 @@
-import from services.stubService {
-    GraphData, GraphNode, GraphEdge, Recommendation, RecommendationsData, ApproveResult,
-    get_graph, get_recommendations, approve_action
+import from services.subway {
+    get_graph, get_recommendations, approve_action, verify_action
 }
 
 cl import ".styles.global.css";

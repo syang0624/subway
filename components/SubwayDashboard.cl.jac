@@ -12,8 +12,11 @@ import from "@hugeicons/core-free-icons" {
     InformationCircleIcon
 }
 
-sv import from ..services.stubService {
-    GraphData, GraphNode, GraphEdge, Recommendation, RecommendationsData, ApproveResult,
+sv import from ..backend.subway {
+    GraphData, GraphNode, GraphEdge,
+    Recommendation, RecommendationsData, ApproveResult
+}
+sv import from ..services.subway {
     get_graph, get_recommendations, approve_action, verify_action
 }
 
@@ -285,9 +288,17 @@ def:pub SubwayDashboard() -> JsxElement {
 
                 {#* Dependency Graph *#}
                 {graph_data != None and <section>
-                    <div className="mb-4">
-                        <h2 className="text-lg font-semibold">Dependency graph</h2>
-                        <p className="text-sm text-muted-foreground">Auto-built from GitHub manifest scans. Walkers traversed {len((graph_data as GraphData).nodes)} nodes and {len((graph_data as GraphData).edges)} edges.</p>
+                    <div className="mb-4 flex items-start justify-between gap-4">
+                        <div>
+                            <h2 className="text-lg font-semibold">Dependency graph</h2>
+                            <p className="text-sm text-muted-foreground">Auto-built from GitHub manifest scans. Walkers traversed {len((graph_data as GraphData).nodes)} nodes and {len((graph_data as GraphData).edges)} edges.</p>
+                            {(graph_data as GraphData).warning != "" and
+                                <p className="mt-1 text-xs text-amber-500">{(graph_data as GraphData).warning}</p>
+                            or None}
+                        </div>
+                        <Badge variant="outline">
+                            {(graph_data as GraphData).source == "github" and "Live GitHub" or "Fixture fallback"}
+                        </Badge>
                     </div>
                     <Card>
                         <CardContent className="pt-6 pb-6 pl-6 pr-6">

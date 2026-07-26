@@ -34,12 +34,56 @@ def _post_json(url: str, token: str) -> any {
     return {"status_code": resp.status};
 }
 
+def validate_provider(provider: str) -> dict {
+    token: str = (
+        os.environ.get("GITHUB_TOKEN", "")
+        if provider == "github"
+        else os.environ.get("SUPABASE_ACCESS_TOKEN", "")
+        if provider == "supabase"
+        else os.environ.get("OPENAI_API_KEY", "")
+    );
+    if _demo_mode() or not token {
+        return {
+            "provider": provider,
+            "connected": True,
+            "source": "fixture"
+        };
+    }
+    url: str = (
+        "https://api.github.com/user"
+        if provider == "github"
+        else "https://api.supabase.com/v1/projects"
+        if provider == "supabase"
+        else "https://api.openai.com/v1/models"
+    );
+    try {
+        _get_json(url, token);
+        return {
+            "provider": provider,
+            "connected": True,
+            "source": "live"
+        };
+    } except Exception as e {
+        return {
+            "provider": provider,
+            "connected": False,
+            "source": "live",
+            "error": str(e)
+        };
+    }
+}
+
 def list_repos() -> list {
     """Repos of the demo account, with pushed_at for the staleness rule."""
     token: str = os.environ.get("GITHUB_TOKEN", "");
     user: str = os.environ.get("GITHUB_USERNAME", "syang0624");
     if _demo_mode() or not token {
-        return _fixture_repos();
+        fallback: list = _fixture_repos();
+        for repo in fallback {
+            repo_data: dict = repo as dict;
+            repo_data["source"] = "fixture";
+        }
+        return fallback;
     }
     try {
         repos: any = _get_json(f"https://api.github.com/users/{user}/repos?per_page=100", token, "application/vnd.github+json");
@@ -50,13 +94,24 @@ def list_repos() -> list {
                 "name": rd.get("name", ""),
                 "full_name": rd.get("full_name", ""),
                 "default_branch": rd.get("default_branch", "main"),
-                "pushed_at": rd.get("pushed_at", "")
+                "pushed_at": rd.get("pushed_at", ""),
+                "source": "github"
             });
         }
         return result;
-    } except Exception {
-        return _fixture_repos();
+    } except Exception as e {
+        fallback: list = _fixture_repos();
+        for repo in fallback {
+            repo_data: dict = repo as dict;
+            repo_data["source"] = "fixture";
+            repo_data["error"] = str(e);
+        }
+        return fallback;
     }
+}
+
+def fetch_repos() -> list[dict] {
+    return list_repos() as list[dict];
 }
 
 def fetch_manifests(repo: str) -> dict {
@@ -103,9 +158,18 @@ def fetch_manifests(repo: str) -> dict {
                 }
             }
         }
-        return {"repo": repo, "manifest_files": manifest_files, "deps": deps, "env_vars": env_vars};
+        return {
+            "repo": repo,
+            "manifest_files": manifest_files,
+            "deps": deps,
+            "env_vars": env_vars,
+            "source": "github"
+        };
     } except Exception as e {
-        return {"repo": repo, "manifest_files": [], "deps": [], "env_vars": [], "error": str(e)};
+        fallback: dict = _fixture_manifests(repo);
+        fallback["source"] = "fixture";
+        fallback["error"] = str(e);
+        return fallback;
     }
 }
 
@@ -165,10 +229,29 @@ def restore_project(ref: str) -> dict {
 def get_project_status(ref: str) -> dict {
     token: str = os.environ.get("SUPABASE_ACCESS_TOKEN", "");
     if _demo_mode() or not token {
-        return _fixture_project_status(ref);
+        fixture: dict = _fixture_project_status(ref);
+        fixture["activity_source"] = "fixture";
+        return fixture;
     }
     try {
-        return _get_json(f"https://api.supabase.com/v1/projects/{ref}", token) as dict;
+        project: dict = _get_json(
+            f"https://api.supabase.com/v1/projects/{ref}",
+            token
+        ) as dict;
+        if not project.get("last_activity_at", "") {
+            activity: dict = _fixture_project_status(ref);
+            project["last_activity_at"] = activity.get(
+                "last_activity_at", ""
+            );
+            project["cpu_utilization_pct"] = activity.get(
+                "cpu_utilization_pct", 0
+            );
+            project["db_size_mb"] = activity.get("db_size_mb", 0);
+            project["activity_source"] = "fixture";
+        } else {
+            project["activity_source"] = "supabase";
+        }
+        return project;
     } except Exception as e {
         return {"error": str(e), "ref": ref, "status": "unknown"};
     }
@@ -178,13 +261,29 @@ def get_openai_usage() -> dict {
     """Org-level costs for the last 30 days. Needs an admin key (sk-admin-...)."""
     key: str = os.environ.get("OPENAI_ADMIN_KEY", "");
     if _demo_mode() or not key {
-        return _fixture_openai_usage();
+        fixture: dict = _fixture_openai_usage();
+        fixture["source"] = "fixture";
+        return fixture;
     }
     try {
         start: int = int(time.time()) - (30 * 86400);
-        return _get_json(f"https://api.openai.com/v1/organization/costs?start_time={start}&limit=31", key) as dict;
-    } except Exception {
-        return _fixture_openai_usage();
+        usage: dict = _get_json(
+            f"https://api.openai.com/v1/organization/costs?start_time={start}&limit=31",
+            key
+        ) as dict;
+        if "by_model" in usage {
+            usage["source"] = "openai";
+            return usage;
+        }
+        fixture: dict = _fixture_openai_usage();
+        fixture["source"] = "fixture";
+        fixture["warning"] = "OpenAI cost data lacked model-level attribution.";
+        return fixture;
+    } except Exception as e {
+        fixture: dict = _fixture_openai_usage();
+        fixture["source"] = "fixture";
+        fixture["warning"] = str(e);
+        return fixture;
     }
 }
 
