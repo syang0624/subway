@@ -4,7 +4,6 @@ version = "0.1.0"
 
 [serve]
 base_route_app = "app"
-port = 8001
 
 [dependencies.npm]
 "@hugeicons/react" = "latest"
