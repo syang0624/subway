@@ -1,0 +1,55 @@
+{
+  "_comment": "The agreed get_recommendations report shape. status lifecycle: proposed -> approved -> executed -> verified. Only rec-001 is executable.",
+  "recommendations": [
+    {
+      "id": "rec-001",
+      "type": "supabase_pause",
+      "executable": true,
+      "title": "Pause idle Supabase project legacy-api-db",
+      "target_service": "svc:supabase:legacy-api-db",
+      "affected_projects": ["proj:legacy-api"],
+      "monthly_savings_usd": 25,
+      "status": "proposed",
+      "safety_checks": [
+        "Last database activity 47 days ago",
+        "Only depender is legacy-api, itself untouched since 2026-04-28",
+        "CPU utilization 2%, database 87 MB",
+        "Pause is reversible from the Supabase dashboard in one click"
+      ],
+      "action": { "api": "supabase_management", "call": "POST /v1/projects/{ref}/pause" }
+    },
+    {
+      "id": "rec-002",
+      "type": "openai_rightsize",
+      "executable": false,
+      "title": "Switch tasktomo from gpt-4o to gpt-4o-mini",
+      "target_service": "svc:openai:api",
+      "affected_projects": ["proj:tasktomo"],
+      "monthly_savings_usd": 30,
+      "status": "proposed",
+      "safety_checks": [
+        "3,140 requests/month at low token volume — well inside mini's quality envelope for structured decomposition",
+        "portfolio-site already runs gpt-4o-mini successfully",
+        "One-line change: OPENAI_MODEL env var"
+      ],
+      "action": { "api": null, "manual_steps": "Set OPENAI_MODEL=gpt-4o-mini in tasktomo's deployment env" }
+    },
+    {
+      "id": "rec-003",
+      "type": "unused_subscription",
+      "executable": false,
+      "title": "legacy-api looks abandoned — review its Supabase Pro subscription",
+      "target_service": "svc:supabase:legacy-api-db",
+      "affected_projects": ["proj:legacy-api"],
+      "monthly_savings_usd": 25,
+      "status": "proposed",
+      "safety_checks": [
+        "No commits to legacy-api in 89 days",
+        "Its README marks it deprecated, superseded by TaskTomo",
+        "If pause (rec-001) causes no complaints for 30 days, cancel the Pro subscription entirely"
+      ],
+      "action": { "api": null, "manual_steps": "After a 30-day paused grace period, downgrade the project to the free tier or delete it" },
+      "note": "Savings overlap with rec-001 — count once in the header total"
+    }
+  ]
+}

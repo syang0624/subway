@@ -1,0 +1,35 @@
+{
+  "_comment": "The agreed get_graph report shape — Steven builds the UI against this exact structure; Noriaki's walker must report it. Node ids are stable strings.",
+  "nodes": [
+    { "id": "acct:github", "type": "Account", "label": "GitHub (syang0624)", "provider": "github" },
+    { "id": "acct:supabase", "type": "Account", "label": "Supabase", "provider": "supabase" },
+    { "id": "acct:openai", "type": "Account", "label": "OpenAI", "provider": "openai" },
+    { "id": "proj:tasktomo", "type": "Project", "label": "tasktomo", "last_pushed": "2026-07-24", "stale": false },
+    { "id": "proj:legacy-api", "type": "Project", "label": "legacy-api", "last_pushed": "2026-04-28", "stale": true },
+    { "id": "proj:portfolio-site", "type": "Project", "label": "portfolio-site", "last_pushed": "2026-07-10", "stale": false },
+    { "id": "svc:supabase:tasktomo-db", "type": "Service", "label": "tasktomo-db", "provider": "supabase", "status": "ACTIVE_HEALTHY" },
+    { "id": "svc:supabase:legacy-api-db", "type": "Service", "label": "legacy-api-db", "provider": "supabase", "status": "ACTIVE_HEALTHY", "idle_days": 47 },
+    { "id": "svc:openai:api", "type": "Service", "label": "OpenAI API", "provider": "openai", "status": "active" },
+    { "id": "sub:supabase-pro-tasktomo", "type": "Subscription", "label": "Supabase Pro", "monthly_cost_usd": 25 },
+    { "id": "sub:supabase-pro-legacy", "type": "Subscription", "label": "Supabase Pro", "monthly_cost_usd": 25 },
+    { "id": "sub:openai-usage", "type": "Subscription", "label": "OpenAI usage", "monthly_cost_usd": 118 },
+    { "id": "sub:github-pro", "type": "Subscription", "label": "GitHub Pro", "monthly_cost_usd": 4 }
+  ],
+  "edges": [
+    { "from": "acct:github", "to": "proj:tasktomo", "type": "owns" },
+    { "from": "acct:github", "to": "proj:legacy-api", "type": "owns" },
+    { "from": "acct:github", "to": "proj:portfolio-site", "type": "owns" },
+    { "from": "proj:tasktomo", "to": "svc:supabase:tasktomo-db", "type": "uses" },
+    { "from": "proj:tasktomo", "to": "svc:openai:api", "type": "uses" },
+    { "from": "proj:legacy-api", "to": "svc:supabase:legacy-api-db", "type": "uses" },
+    { "from": "proj:portfolio-site", "to": "svc:openai:api", "type": "uses" },
+    { "from": "svc:supabase:tasktomo-db", "to": "sub:supabase-pro-tasktomo", "type": "billed_as" },
+    { "from": "svc:supabase:legacy-api-db", "to": "sub:supabase-pro-legacy", "type": "billed_as" },
+    { "from": "svc:openai:api", "to": "sub:openai-usage", "type": "billed_as" },
+    { "from": "acct:github", "to": "sub:github-pro", "type": "billed_as" }
+  ],
+  "totals": {
+    "monthly_cost_usd": 172,
+    "note": "25 + 25 + 118 + 4 = 172 before optimization; 117 after both savings land (-25 pause, -30 right-size)"
+  }
+}

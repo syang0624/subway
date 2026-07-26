@@ -1,0 +1,29 @@
+{
+  "_comment": "Fallback for GitHub /user/repos. pushed_at drives the staleness rule (legacy-api > 60 days idle as of the 2026-07 demo).",
+  "repos": [
+    {
+      "name": "tasktomo",
+      "full_name": "syang0624/tasktomo",
+      "default_branch": "main",
+      "pushed_at": "2026-07-24T18:12:00Z",
+      "language": "TypeScript",
+      "manifest_files": ["package.json", ".env.example"]
+    },
+    {
+      "name": "legacy-api",
+      "full_name": "syang0624/legacy-api",
+      "default_branch": "main",
+      "pushed_at": "2026-04-28T09:30:00Z",
+      "language": "Python",
+      "manifest_files": ["requirements.txt", ".env.example"]
+    },
+    {
+      "name": "portfolio-site",
+      "full_name": "syang0624/portfolio-site",
+      "default_branch": "main",
+      "pushed_at": "2026-07-10T21:45:00Z",
+      "language": "Astro",
+      "manifest_files": ["package.json", ".env.example"]
+    }
+  ]
+}

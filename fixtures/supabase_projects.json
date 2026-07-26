@@ -1,0 +1,31 @@
+{
+  "_comment": "Fallback for Supabase Management API GET /v1/projects. legacy-api-db is the idle pause target (last activity 47 days before the 2026-07-26 demo).",
+  "projects": [
+    {
+      "id": "tasktomo-db-ref0",
+      "name": "tasktomo-db",
+      "region": "us-east-1",
+      "status": "ACTIVE_HEALTHY",
+      "created_at": "2025-11-03T10:00:00Z",
+      "last_activity_at": "2026-07-25T14:00:00Z",
+      "plan": "pro",
+      "monthly_cost_usd": 25,
+      "compute": "micro",
+      "cpu_utilization_pct": 34,
+      "db_size_mb": 412
+    },
+    {
+      "id": "legacy-api-db-ref0",
+      "name": "legacy-api-db",
+      "region": "us-east-1",
+      "status": "ACTIVE_HEALTHY",
+      "created_at": "2025-06-14T10:00:00Z",
+      "last_activity_at": "2026-06-09T08:15:00Z",
+      "plan": "pro",
+      "monthly_cost_usd": 25,
+      "compute": "small",
+      "cpu_utilization_pct": 2,
+      "db_size_mb": 87
+    }
+  ]
+}

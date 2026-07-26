@@ -1,0 +1,19 @@
+{
+  "_comment": "Fallback for per-repo manifest fetches. The scanner pattern-matches deps/env vars to detect services.",
+  "tasktomo": {
+    "package.json": {
+      "dependencies": ["@supabase/supabase-js", "next", "openai", "react", "react-dom", "zod"]
+    },
+    ".env.example": ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY", "OPENAI_API_KEY", "OPENAI_MODEL"]
+  },
+  "legacy-api": {
+    "requirements.txt": ["fastapi", "uvicorn", "supabase", "pydantic", "python-dotenv"],
+    ".env.example": ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "DATABASE_URL"]
+  },
+  "portfolio-site": {
+    "package.json": {
+      "dependencies": ["astro", "openai"]
+    },
+    ".env.example": ["OPENAI_API_KEY", "OPENAI_MODEL"]
+  }
+}

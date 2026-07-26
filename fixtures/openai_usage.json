@@ -1,0 +1,29 @@
+{
+  "_comment": "Fallback for the OpenAI usage/costs API (last 30 days). Low-volume gpt-4o usage justifies the right-sizing recommendation.",
+  "period": "2026-06-26/2026-07-26",
+  "total_cost_usd": 118,
+  "by_model": [
+    {
+      "model": "gpt-4o",
+      "cost_usd": 102,
+      "input_tokens": 8200000,
+      "output_tokens": 1900000,
+      "requests": 3140,
+      "used_by": ["tasktomo"]
+    },
+    {
+      "model": "gpt-4o-mini",
+      "cost_usd": 16,
+      "input_tokens": 21500000,
+      "output_tokens": 6400000,
+      "requests": 18900,
+      "used_by": ["portfolio-site"]
+    }
+  ],
+  "right_sizing": {
+    "candidate_model": "gpt-4o-mini",
+    "estimated_cost_usd": 72,
+    "estimated_savings_usd": 30,
+    "rationale": "tasktomo's decomposition prompts are short and structured; gpt-4o-mini benchmarks equivalently on this task shape at low volume."
+  }
+}

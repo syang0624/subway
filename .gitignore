@@ -1,5 +1,22 @@
-# macOS
+# Secrets — never commit real tokens; use .env.example as the template
+.env
+.env.local
+
+# Jac build artifacts
+__jac_gen__/
+*.jir
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS / editor / local tool state
 .DS_Store
+.vscode/
+.idea/
+.omc/
 
 # Project-local npm installation of Codex and Oh My Codex
 node_modules/
