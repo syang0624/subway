@@ -12,12 +12,7 @@ import from backend.subway {
 
 
 def _initialize() -> None {
-    connection = root spawn connect_accounts();
-    if connection.reports[0].status == "error" {
-        raise RuntimeError(
-            "One or more provider credentials failed validation."
-        );
-    }
+    root spawn connect_accounts();
     root spawn discover_stack();
     root spawn analyze();
 }

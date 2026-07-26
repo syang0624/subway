@@ -58,16 +58,18 @@ The one question competitors can't answer, SUBway answers first:
  │   dependency graph, recommendation cards, approve buttons, savings header
  │        `sv import` calls server functions directly (typed, no REST glue)
  ▼
- services/stubService.sv.jac       — fixture-backed get_graph / get_recommendations /
- │   approve_action / verify_action — Noriaki swaps in the walker-backed module here
+ services/subway.sv.jac            — typed façade: spawns walkers, returns the
+ │   agreed shapes (stubService.sv.jac kept as offline fallback reference)
  services/connectors.sv.jac        — Steven's HTTP connectors (GitHub, Supabase
  │   Management API, OpenAI costs) with DEMO_MODE + fixture fallback
  ▼
- [Noriaki] backend graph + walkers (replaces stubService at integration):
+ backend/subway.jac                — Noriaki's graph + walkers (INTEGRATED):
        Graph: Account ─owns→ Project ─uses→ Service ─billed_as→ Subscription
-              Recommendation ─targets→ Service / Project
-       Walkers: connect_accounts · discover_stack ★ · analyze · explain (byLLM) ·
-                approve_action · execute_action · verify_action
+              RecommendationRecord ─targets→ Service
+       Walkers: connect_accounts · discover_stack ★ · analyze · get_graph ·
+                get_recommendations · approve_action → execute_action →
+                verify_action (live status polling) · explain (byLLM, rules decide)
+       Tests: backend/subway.test.jac (jac test)
 ```
 
 The client imports server functions via `sv import` with the same names/shapes as the stub, so swapping in Noriaki's walker-backed module changes zero UI code. The dependency graph renders as typed layers (Accounts → Projects → Services → Subscriptions) with edge-type labels between them. The UI gates the graph behind connecting all three accounts — the connect → scan → graph-materializes beat is the demo's wow moment.

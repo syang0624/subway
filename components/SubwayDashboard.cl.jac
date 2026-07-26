@@ -36,6 +36,7 @@ def:pub SubwayDashboard() -> JsxElement {
 
     async def run_scan() -> None {
         scanning = True;
+        error_msg = "";
         try {
             gd: GraphData = await get_graph();
             rd: RecommendationsData = await get_recommendations();
@@ -66,6 +67,7 @@ def:pub SubwayDashboard() -> JsxElement {
 
     async def handle_approve(rec_id: str) -> None {
         approving = rec_id;
+        error_msg = "";
         try {
             result: ApproveResult = await approve_action(rec_id=rec_id);
             if result.status == "approved" {
@@ -77,7 +79,11 @@ def:pub SubwayDashboard() -> JsxElement {
                     if rec_id == "rec-001" {
                         total_cost = total_cost - 25;
                     }
+                } else {
+                    error_msg = vresult.message;
                 }
+            } else {
+                error_msg = result.message;
             }
         } except Exception as e {
             error_msg = str(e);
@@ -88,6 +94,7 @@ def:pub SubwayDashboard() -> JsxElement {
 
     async def handle_mark_done(rec_id: str) -> None {
         approving = rec_id;
+        error_msg = "";
         try {
             result: ApproveResult = await approve_action(rec_id=rec_id);
             if result.status == "approved" {
@@ -95,6 +102,8 @@ def:pub SubwayDashboard() -> JsxElement {
                 if rec_id == "rec-002" {
                     total_cost = total_cost - 30;
                 }
+            } else {
+                error_msg = result.message;
             }
         } except Exception as e {
             error_msg = str(e);
@@ -156,6 +165,13 @@ def:pub SubwayDashboard() -> JsxElement {
 
         <main className="mx-auto max-w-7xl pl-6 pr-6 pt-8 pb-8">
             <div className="flex flex-col gap-8">
+
+                {#* Error banner *#}
+                {error_msg != "" and
+                    <div className="rounded-md border border-destructive/40 bg-destructive/10 pl-4 pr-4 pt-3 pb-3">
+                        <p className="text-sm font-medium text-destructive">{error_msg}</p>
+                    </div>
+                or None}
 
                 {#* Connect Panel *#}
                 <section>

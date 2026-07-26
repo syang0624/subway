@@ -263,14 +263,6 @@ walker:pub connect_accounts {
             status for status in provider_statuses
             if not bool(status.get("connected", False))
         ];
-        if len(invalid) > 0 {
-            report ConnectionResult(
-                providers=["github", "supabase", "openai"],
-                provider_statuses=provider_statuses,
-                status="error"
-            );
-            disengage;
-        }
         github = here ++> Account(
             stable_id="acct:github",
             label="GitHub (syang0624)",
@@ -344,6 +336,9 @@ walker:pub connect_accounts {
             if provider_status.get("source", "") == "fixture" {
                 connection_status = "demo";
             }
+        }
+        if len(invalid) > 0 {
+            connection_status = "degraded";
         }
         report ConnectionResult(
             providers=["github", "supabase", "openai"],
