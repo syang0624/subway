@@ -1,7 +1,7 @@
 # PRD: SUBway — Dependency-Aware Subscription Autopilot
 
 **Version:** 1.0 (post-interview) · **Date:** 2026-07-26
-**Context:** Jac-sponsored hackathon · **3-hour build window** · **team of 2** · no code pre-building allowed (data/account seeding is allowed)
+**Context:** JacHacks SF 2026 (Founders Inc, Jul 26) · **3-hour build window** · **team of 2** · no code pre-building allowed (data/account seeding is allowed) · **4-minute demo**, scored per `JacHacks_SF_Rubric_HACKERS.pdf`
 **Primary language:** Jac ([jaclang.org/docs/latest](https://jaclang.org/docs/latest)) — judges evaluate idiomatic Jac usage (nodes/edges/walkers/byLLM). **Both backend AND frontend are written in Jac**: the UI is a Streamlit app authored in Jac via the `jaclang_streamlit` plugin (`jac streamlit app.jac`). No HTML/JS/Python glue anywhere in the stack.
 
 ---
@@ -22,8 +22,9 @@ The one question competitors can't answer, SUBway answers first:
 - ❌ Teams, multi-user, billing/invoice ingestion, policies
 - ❌ Vercel/AWS/consumer connectors (future-work slide only)
 
-## 3. Demo Script (the contract for scope)
+## 3. Demo Script (the contract for scope — 4:00 hard limit)
 
+0. *(0:00–0:30)* **Who it's for and what breaks today** (rubric asks for one person, not a market): "Steven, an indie dev with 3 side projects, pays $172/mo across Supabase, OpenAI, and GitHub. He wants to cut costs but doesn't know what breaks if he downgrades — so he pays for everything, forever."
 1. Open SUBway. Click **Connect GitHub / Supabase / OpenAI** (fake-OAuth: buttons validate pre-configured tokens and light up).
 2. **★ WOW MOMENT — protect at all costs:** the dependency graph materializes automatically. Walkers scan repo manifests via the GitHub API and draw Project → Service edges with no manual input.
 3. AI analysis runs: three recommendation cards appear (full card data in `fixtures/recommendations.json`):
@@ -33,6 +34,7 @@ The one question competitors can't answer, SUBway answers first:
 4. Each card shows byLLM-generated safety reasoning: *"✓ no production repos affected ✓ last query 47 days ago ✓ easily restorable."*
 5. User clicks **Approve** on the Supabase card → real `POST /v1/projects/{ref}/pause` fires against the live Supabase Management API.
 6. Verify walker re-fetches project status → card flips to ✅, header savings counter updates ($172/mo → $117/mo once both savings land). Optionally show the Supabase dashboard as proof.
+7. *(last 30s)* **Show where Jac runs** — the rubric explicitly says point to it, don't just say it: flash `backend/subway.jac` (node/edge/walker declarations, the byLLM `explain` ability) and note the UI itself is Jac via jac-streamlit. "Every line of this product is Jac."
 
 **Fallback:** if live execution misbehaves on stage, the graph + recommendations + reasoning still carry the demo (per priority decision: the auto-built graph is the must-not-lose moment; execution is the encore).
 
@@ -105,6 +107,17 @@ Because the UI is Jac, the Streamlit app imports the backend module and spawns w
 The entire stack is Jac, so both names appear throughout the judged surface — Noriaki in the graph/walkers, Steven in the Streamlit UI and connectors.
 
 **Cut lines, in order, when behind:** (1) drop OpenAI right-sizing card → hardcode its numbers; (2) drop byLLM explain → template strings; (3) drop verify walker → optimistic UI + show Supabase dashboard; (4) drop connect buttons → start pre-connected. **Never cut:** discover_stack → live graph render.
+
+## 6.5 Rubric Alignment (how we score)
+
+| Criterion | Weight | Our play |
+|---|---|---|
+| Use of Jac | **40%** | Target 5/5 "CENTRAL" — the rubric's own words ("walkers, graph traversal, byLLM, agentic flows") describe our stack literally: graph traversal IS the product insight (dependency-aware recommendations), walkers orchestrate discover→analyze→execute→verify, byLLM writes safety reasoning, and even the UI is Jac. Highest score here also wins **Best JacHammer**. |
+| Real-World Use Case | 20% | Named person, not a market: an indie dev with side projects bleeding subscription money, afraid to downgrade. Open the demo with him. |
+| Technical Execution | 20% | The hard part genuinely done: live GitHub scanning → auto-built graph + one real Supabase API execution round-trip. Not scaffolding. |
+| Demo & Story | 20% | Core flow runs end-to-end live in 4:00 (rubric: "run it, don't describe it"). Fixtures + rehearsal protect against stage failures. |
+
+**Rubric floor:** a 3+ on Use of Jac is mandatory to qualify for anything — one more reason the all-Jac decision is right, and why the cut lines never touch walker logic.
 
 ## 7. Success Criteria
 
