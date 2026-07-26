@@ -5,6 +5,8 @@
 # Jac build artifacts
 __jac_gen__/
 *.jir
+.jac/
+.jac-server.log
 
 # Python
 __pycache__/

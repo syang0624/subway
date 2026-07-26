@@ -14,11 +14,11 @@ import from "@hugeicons/core-free-icons" {
 
 sv import from ..services.stubService {
     GraphData, GraphNode, GraphEdge, Recommendation, RecommendationsData, ApproveResult,
-    get_graph, get_recommendations, approve_action
+    get_graph, get_recommendations, approve_action, verify_action
 }
 
 def:pub SubwayDashboard() -> JsxElement {
-    has loading: bool = True;
+    has scanning: bool = False;
     has graph_data: GraphData | None = None;
     has recs_data: RecommendationsData | None = None;
     has connected_github: bool = False;
@@ -26,12 +26,13 @@ def:pub SubwayDashboard() -> JsxElement {
     has connected_openai: bool = False;
     has connecting: str = "";
     has approving: str = "";
+    has verifying: str = "";
     has approved_ids: list[str] = [];
     has total_cost: int = 172;
     has error_msg: str = "";
 
-    async can with entry {
-        loading = True;
+    async def run_scan() -> None {
+        scanning = True;
         try {
             gd: GraphData = await get_graph();
             rd: RecommendationsData = await get_recommendations();
@@ -41,11 +42,12 @@ def:pub SubwayDashboard() -> JsxElement {
         } except Exception as e {
             error_msg = str(e);
         }
-        loading = False;
+        scanning = False;
     }
 
     async def handle_connect(provider: str) -> None {
         connecting = provider;
+        all_connected: bool = (provider == "github" or connected_github) and (provider == "supabase" or connected_supabase) and (provider == "openai" or connected_openai);
         if provider == "github" {
             connected_github = True;
         } elif provider == "supabase" {
@@ -54,6 +56,9 @@ def:pub SubwayDashboard() -> JsxElement {
             connected_openai = True;
         }
         connecting = "";
+        if all_connected {
+            await run_scan();
+        }
     }
 
     async def handle_approve(rec_id: str) -> None {
@@ -61,10 +66,30 @@ def:pub SubwayDashboard() -> JsxElement {
         try {
             result: ApproveResult = await approve_action(rec_id=rec_id);
             if result.status == "approved" {
+                approving = "";
+                verifying = rec_id;
+                vresult: ApproveResult = await verify_action(rec_id=rec_id);
+                if vresult.status == "verified" {
+                    approved_ids = approved_ids + [rec_id];
+                    if rec_id == "rec-001" {
+                        total_cost = total_cost - 25;
+                    }
+                }
+            }
+        } except Exception as e {
+            error_msg = str(e);
+        }
+        approving = "";
+        verifying = "";
+    }
+
+    async def handle_mark_done(rec_id: str) -> None {
+        approving = rec_id;
+        try {
+            result: ApproveResult = await approve_action(rec_id=rec_id);
+            if result.status == "approved" {
                 approved_ids = approved_ids + [rec_id];
-                if rec_id == "rec-001" {
-                    total_cost = total_cost - 25;
-                } elif rec_id == "rec-002" {
+                if rec_id == "rec-002" {
                     total_cost = total_cost - 30;
                 }
             }
@@ -96,14 +121,7 @@ def:pub SubwayDashboard() -> JsxElement {
         return total;
     }
 
-    if loading {
-        return <div className="flex min-h-screen items-center justify-center bg-background">
-            <div className="flex flex-col items-center gap-4">
-                <Spinner className="size-8 text-primary" />
-                <p className="text-sm text-muted-foreground">Scanning your stack...</p>
-            </div>
-        </div>;
-    }
+    fully_connected: bool = connected_github and connected_supabase and connected_openai;
 
     return <div className="min-h-screen bg-background">
         {#* Header *#}
@@ -240,6 +258,31 @@ def:pub SubwayDashboard() -> JsxElement {
 
                 <Separator />
 
+                {#* Empty state: graph appears only after all accounts connect *#}
+                {not fully_connected and <section>
+                    <Card>
+                        <CardContent className="pt-10 pb-10 pl-6 pr-6">
+                            <div className="flex flex-col items-center gap-2 text-center">
+                                <HugeiconsIcon icon={Analytics01Icon} strokeWidth={2} className="size-8 text-muted-foreground" />
+                                <p className="font-medium">Your dependency graph appears here</p>
+                                <p className="max-w-md text-sm text-muted-foreground">Connect all three accounts — SUBway scans your repos, detects which services each project uses, and builds the graph automatically. No manual mapping.</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </section> or None}
+
+                {#* Scanning state *#}
+                {scanning and <section>
+                    <Card>
+                        <CardContent className="pt-10 pb-10 pl-6 pr-6">
+                            <div className="flex flex-col items-center gap-3">
+                                <Spinner className="size-6 text-primary" />
+                                <p className="text-sm text-muted-foreground">Scanning repos, mapping dependencies, analyzing usage...</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </section> or None}
+
                 {#* Dependency Graph *#}
                 {graph_data != None and <section>
                     <div className="mb-4">
@@ -253,7 +296,7 @@ def:pub SubwayDashboard() -> JsxElement {
                     </Card>
                 </section> or None}
 
-                <Separator />
+                {graph_data != None and <Separator /> or None}
 
                 {#* Recommendations *#}
                 {recs_data != None and <section>
@@ -275,7 +318,9 @@ def:pub SubwayDashboard() -> JsxElement {
                                 rec={rec}
                                 status={get_rec_status(rec)}
                                 approving={approving == rec.id}
+                                verifying={verifying == rec.id}
                                 on_approve={lambda { handle_approve(rec.id); }}
+                                on_mark_done={lambda { handle_mark_done(rec.id); }}
                             />
                         }}
                     </div>
@@ -363,8 +408,10 @@ def:pub GraphNodeChip(gnode: GraphNode, color_map: dict) -> JsxElement {
     </div>;
 }
 
-def:pub RecommendationCard(rec: Recommendation, status: str, approving: bool, on_approve: any) -> JsxElement {
+def:pub RecommendationCard(rec: Recommendation, status: str, approving: bool, verifying: bool, on_approve: any, on_mark_done: any) -> JsxElement {
     is_approved: bool = status == "approved";
+    busy: bool = approving or verifying;
+    can_mark_done: bool = not rec.executable and rec.rec_type == "openai_rightsize";
     type_labels: dict = {
         "supabase_pause": "Supabase Pause",
         "openai_rightsize": "Model Right-sizing",
@@ -423,12 +470,25 @@ def:pub RecommendationCard(rec: Recommendation, status: str, approving: bool, on
             <CardFooter>
                 <Button
                     onClick={on_approve}
-                    disabled={approving}
+                    disabled={busy}
+                    className="w-full"
+                >
+                    {busy and <Spinner className="mr-2 size-4" /> or None}
+                    {verifying and "Verifying via Management API..." or (approving and "Executing..." or "Approve and Execute")}
+                    {not busy and <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} className="ml-2 size-4" /> or None}
+                </Button>
+            </CardFooter>
+        or None}
+        {can_mark_done and not is_approved and
+            <CardFooter>
+                <Button
+                    variant="outline"
+                    onClick={on_mark_done}
+                    disabled={busy}
                     className="w-full"
                 >
                     {approving and <Spinner className="mr-2 size-4" /> or None}
-                    {approving and "Executing..." or "Approve and Execute"}
-                    {not approving and <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} className="ml-2 size-4" /> or None}
+                    {approving and "Applying..." or "Mark as applied (manual env change)"}
                 </Button>
             </CardFooter>
         or None}
@@ -436,7 +496,7 @@ def:pub RecommendationCard(rec: Recommendation, status: str, approving: bool, on
             <CardFooter>
                 <div className="flex w-full items-center justify-center gap-2 rounded-md bg-primary/10 pl-4 pr-4 pt-3 pb-3">
                     <HugeiconsIcon icon={CheckmarkCircle01Icon} strokeWidth={2} className="size-4 text-primary" />
-                    <span className="text-sm font-medium text-primary">Executed — savings applied</span>
+                    <span className="text-sm font-medium text-primary">{rec.executable and "Executed and verified — savings applied" or "Applied — savings counted"}</span>
                 </div>
             </CardFooter>
         or None}

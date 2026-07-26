@@ -150,3 +150,7 @@ def:pub approve_action(rec_id: str) -> ApproveResult {
     _approved_recs.append(rec_id);
     return ApproveResult(id=rec_id, status="approved", message=f"Recommendation {rec_id} approved and queued for execution.");
 }
+
+def:pub verify_action(rec_id: str) -> ApproveResult {
+    return ApproveResult(id=rec_id, status="verified", message=f"Verified: target service state confirmed for {rec_id}; savings active.");
+}

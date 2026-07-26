@@ -2,7 +2,7 @@
 
 **Version:** 1.0 (post-interview) · **Date:** 2026-07-26
 **Context:** JacHacks SF 2026 (Founders Inc, Jul 26) · **3-hour build window** · **team of 2** · no code pre-building allowed (data/account seeding is allowed) · **4-minute demo**, scored per `JacHacks_SF_Rubric_HACKERS.pdf`
-**Primary language:** Jac ([jaclang.org/docs/latest](https://jaclang.org/docs/latest)) — judges evaluate idiomatic Jac usage (nodes/edges/walkers/byLLM). **Both backend AND frontend are written in Jac**: the UI is a Streamlit app authored in Jac via the `jaclang_streamlit` plugin (`jac streamlit app.jac`). No HTML/JS/Python glue anywhere in the stack.
+**Primary language:** Jac ([jaclang.org/docs/latest](https://jaclang.org/docs/latest)) — judges evaluate idiomatic Jac usage (nodes/edges/walkers/byLLM). **Both backend AND frontend are written in Jac** using Jac's full-stack client/server model: UI components in `.cl.jac` files (JSX-in-Jac, shadcn components), server services in `.sv.jac` files, served together by `jac start main.jac`. No hand-written HTML/JS/Python anywhere in the stack.
 
 ---
 
@@ -53,26 +53,24 @@ The one question competitors can't answer, SUBway answers first:
 ## 5. Architecture
 
 ```
- frontend/app.jac  — Streamlit UI written in Jac (run: `jac streamlit app.jac`)
- │   connect panel · dependency graph view · recommendation cards ·
- │   Approve buttons · savings header
- │        spawns walkers directly (same Jac runtime — no REST layer needed)
+ main.jac                          — app entry + router (`jac start main.jac`)
+ components/SubwayDashboard.cl.jac — Jac client UI: connect panel, layered
+ │   dependency graph, recommendation cards, approve buttons, savings header
+ │        `sv import` calls server functions directly (typed, no REST glue)
  ▼
- backend/subway.jac — graph + walkers (single shared codebase)
- ├── Graph: Account ─owns→ Project ─uses→ Service ─billed_as→ Subscription
- │          Recommendation ─targets→ Service / Project
- ├── Walkers (the judged surface):
- │     connect_accounts   validate tokens, create Account/Service nodes
- │     discover_stack     GitHub API manifest scan → Project nodes + uses edges  ★
- │     analyze            usage fetch + rule-based waste detection → Recommendation nodes
- │     explain            byLLM ability: safety/impact reasoning per recommendation
- │     approve_action     mark approved, trigger execution
- │     execute_action     real Supabase pause via Management API
- │     verify_action      re-fetch status, update graph + savings
- └── byLLM: OpenAI (existing key) for explanation generation
+ services/stubService.sv.jac       — fixture-backed get_graph / get_recommendations /
+ │   approve_action / verify_action — Noriaki swaps in the walker-backed module here
+ services/connectors.sv.jac        — Steven's HTTP connectors (GitHub, Supabase
+ │   Management API, OpenAI costs) with DEMO_MODE + fixture fallback
+ ▼
+ [Noriaki] backend graph + walkers (replaces stubService at integration):
+       Graph: Account ─owns→ Project ─uses→ Service ─billed_as→ Subscription
+              Recommendation ─targets→ Service / Project
+       Walkers: connect_accounts · discover_stack ★ · analyze · explain (byLLM) ·
+                approve_action · execute_action · verify_action
 ```
 
-Because the UI is Jac, the Streamlit app imports the backend module and spawns walkers in-process on button clicks — no jac-cloud/REST layer in the MVP (jac serve is a stretch goal if we want to show an API story). Graph rendering: `jac dot_view` / graphviz output of the live node-edge structure, or a Streamlit graph component fed from a walker that reports nodes+edges.
+The client imports server functions via `sv import` with the same names/shapes as the stub, so swapping in Noriaki's walker-backed module changes zero UI code. The dependency graph renders as typed layers (Accounts → Projects → Services → Subscriptions) with edge-type labels between them. The UI gates the graph behind connecting all three accounts — the connect → scan → graph-materializes beat is the demo's wow moment.
 
 **Graph schema (trimmed from idea.md's 12 nodes to 5):**
 
@@ -88,8 +86,8 @@ Because the UI is Jac, the Streamlit app imports the backend module and spawns w
 
 ## 6. Team Split & Hour-by-Hour Plan
 
-**Noriaki — backend (`backend/subway.jac`):** graph schema, all walkers, byLLM explain ability, execution/verify logic.
-**Steven — frontend + connectors (`frontend/app.jac`, `backend/connectors.jac`):** the Jac-authored Streamlit UI (connect panel, graph view, recommendation cards, approve buttons) plus the GitHub/Supabase/OpenAI HTTP connector functions — all written in Jac.
+**Noriaki — backend:** graph schema, all walkers, byLLM explain ability, execution/verify logic — delivered as a `.sv.jac` module exposing the same functions as `services/stubService.sv.jac`.
+**Steven — frontend + connectors (`components/SubwayDashboard.cl.jac`, `services/connectors.sv.jac`):** the Jac client UI (connect panel, graph view, recommendation cards, approve buttons) plus the GitHub/Supabase/OpenAI HTTP connector functions — all written in Jac.
 
 **Collaboration contract (agree in the first 15 minutes, then work independently):**
 - The **walker interface is the contract**: agree on walker names + the shape each reports — the exact shapes are already written down in `fixtures/graph.json` (`get_graph`) and `fixtures/recommendations.json` (`get_recommendations`); `approve_action(rec_id)` reports the new status. Steven builds the UI against a stub module that reports the fixtures verbatim; swap in Noriaki's real module at integration — same names, zero UI changes.
