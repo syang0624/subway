@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Project-local npm installation of Codex and Oh My Codex
+node_modules/
+package.json
+package-lock.json
+npm-debug.log*
+
+# Oh My Codex project setup and runtime
+AGENTS.md
+.agents/
+.codex/
+.omx/
+.omx-config.json
+omx-capabilities.lock.json
+.gjc/
+.beads/
+.codegraph/
