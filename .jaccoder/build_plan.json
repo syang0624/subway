@@ -1,0 +1,120 @@
+{
+  "schema_version": "1",
+  "ui": {
+    "app_type": "dashboard",
+    "nav_pattern": "none",
+    "pages": [
+      {
+        "name": "SubwayDashboard",
+        "route": "/",
+        "title": "SUBway \u2014 Subscription Manager"
+      }
+    ],
+    "primitive_components": [
+      "card",
+      "button",
+      "badge",
+      "separator",
+      "progress",
+      "scroll-area",
+      "tooltip",
+      "spinner"
+    ],
+    "style": "lyra",
+    "base_color": "zinc",
+    "theme": "indigo",
+    "font": "inter",
+    "radius": "medium",
+    "menu_accent": "bold",
+    "auth_required": false,
+    "backend_required": true,
+    "ai_required": false
+  },
+  "files": [
+    {
+      "path": "services/stubService.sv.jac",
+      "layer": "service",
+      "purpose": "Stub walkers that return fixture data: get_graph returns graph.json nodes/edges, get_recommendations returns recommendations.json, approve_action(rec_id) transitions a recommendation status from proposed to approved.",
+      "exports": [
+        "get_graph",
+        "get_recommendations",
+        "approve_action"
+      ],
+      "imports_from_plan": [],
+      "write_order": 1,
+      "status": "done"
+    },
+    {
+      "path": "services/connectors.sv.jac",
+      "layer": "service",
+      "purpose": "HTTP connector functions: fetch_manifests(repo) calls GitHub API, pause_project(ref) calls Supabase Management API POST /v1/projects/{ref}/pause, get_project_status(ref) calls Supabase GET /v1/projects/{ref}, get_openai_usage() calls OpenAI usage API.",
+      "exports": [
+        "fetch_manifests",
+        "pause_project",
+        "get_project_status",
+        "get_openai_usage"
+      ],
+      "imports_from_plan": [],
+      "write_order": 2,
+      "status": "done"
+    },
+    {
+      "path": "components/SubwayDashboard.cl.jac",
+      "layer": "page",
+      "purpose": "Full single-page dashboard: Connect panel with GitHub/Supabase/OpenAI fake-OAuth buttons that light up when connected; savings header showing $172/mo with live update on approval; dependency graph SVG view showing Account/Project/Service/Subscription nodes and edges; three recommendation cards with safety checks, savings badge, Approve button, and status transitions (proposed \u2192 approved \u2192 executed \u2192 verified).",
+      "exports": [
+        "SubwayDashboard"
+      ],
+      "imports_from_plan": [
+        "get_graph",
+        "get_recommendations",
+        "approve_action"
+      ],
+      "write_order": 3,
+      "status": "done"
+    },
+    {
+      "path": "main.jac",
+      "layer": "shell",
+      "purpose": "App router: imports SubwayDashboard and mounts it at route / via React Router. Exports def:pub app() with no parameters.",
+      "exports": [
+        "app"
+      ],
+      "imports_from_plan": [
+        "SubwayDashboard"
+      ],
+      "write_order": 4,
+      "status": "done"
+    }
+  ],
+  "write_order": [
+    "services/stubService.sv.jac",
+    "services/connectors.sv.jac",
+    "components/SubwayDashboard.cl.jac",
+    "main.jac"
+  ],
+  "dependency_graph": {
+    "services/stubService.sv.jac": [],
+    "services/connectors.sv.jac": [],
+    "components/SubwayDashboard.cl.jac": [
+      "services/stubService.sv.jac"
+    ],
+    "main.jac": [
+      "components/SubwayDashboard.cl.jac"
+    ]
+  },
+  "remove_from_template": [],
+  "verify": {
+    "flow": "approve_action",
+    "route": "/",
+    "steps": "Click Approve on the first recommendation card (Pause idle Supabase project legacy-api-db); the card status badge changes from 'proposed' to 'approved' and the savings header updates from $172/mo to $147/mo."
+  },
+  "build_log": {
+    "overall_status": "pending",
+    "last_action": "",
+    "issues": [],
+    "learnings": []
+  },
+  "confidence": 0.88,
+  "assumption": "The jac.toml project has no existing Jac source files, so the full app is built from scratch; the stub service reads fixture JSON files at relative paths from the project root, and the connectors service is scaffolded with real HTTP calls but not exercised until real API tokens are provided."
+}

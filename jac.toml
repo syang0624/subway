@@ -2,6 +2,40 @@
 name = "Subway"
 version = "0.1.0"
 
+[serve]
+base_route_app = "app"
+port = 8001
+
+[dependencies.npm]
+"@hugeicons/react" = "latest"
+"@hugeicons/core-free-icons" = "latest"
+"class-variance-authority" = "latest"
+"radix-ui" = "latest"
+clsx = "latest"
+"tailwind-merge" = "latest"
+
+[dependencies.npm.dev]
+tailwindcss = "latest"
+"@tailwindcss/vite" = "latest"
+"@vitejs/plugin-react" = "^4.3.4"
+
+[plugins.client.vite]
+plugins = ["tailwindcss()"]
+lib_imports = ["import tailwindcss from '@tailwindcss/vite'"]
+
+[jac-shadcn]
+style = "nova"
+baseColor = "zinc"
+theme = "indigo"
+font = "inter"
+radius = "medium"
+menuAccent = "subtle"
+menuColor = "default"
+
+[client.vite]
+plugins = ["tailwindcss()"]
+lib_imports = ["import tailwindcss from '@tailwindcss/vite'"]
+
 [jacpack]
 name = 'Subway'
 description = 'Jac IDE snapshot for Subway'
