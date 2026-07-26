@@ -32,3 +32,6 @@ menuColor = "default"
 [jacpack]
 name = 'Subway'
 description = 'Jac IDE snapshot for Subway'
+
+[byllm.model]
+default_model = "gpt-4o-mini"

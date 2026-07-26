@@ -1,5 +1,4 @@
-import from services.stubService {
-    GraphData, GraphNode, GraphEdge, Recommendation, RecommendationsData, ApproveResult,
+import from services.subway {
     get_graph, get_recommendations, approve_action
 }
 
