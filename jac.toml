@@ -1,0 +1,7 @@
+[project]
+name = "Subway"
+version = "0.1.0"
+
+[jacpack]
+name = 'Subway'
+description = 'Jac IDE snapshot for Subway'
