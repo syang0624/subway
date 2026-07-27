@@ -8,26 +8,26 @@ import os;
 import json;
 import time;
 import base64;
-import urllib.request;
+import from urllib.request { Request, urlopen }
 
 def _demo_mode() -> bool {
     return os.environ.get("DEMO_MODE", "false").lower() == "true";
 }
 
 def _get_json(url: str, token: str, accept: str = "application/json") -> any {
-    req: any = urllib.request.Request(url);
+    req: Request = Request(url);
     req.add_header("Authorization", f"Bearer {token}");
     req.add_header("Accept", accept);
-    resp: any = urllib.request.urlopen(req);
-    return json.loads(resp.read().decode());
+    resp: any = urlopen(req);
+    return json.loads(str(resp.read().decode()));
 }
 
 def _post_json(url: str, token: str) -> any {
-    req: any = urllib.request.Request(url, data=b"{}", method="POST");
+    req: Request = Request(url, data=b"{}", method="POST");
     req.add_header("Authorization", f"Bearer {token}");
     req.add_header("Content-Type", "application/json");
-    resp: any = urllib.request.urlopen(req);
-    body: str = resp.read().decode();
+    resp: any = urlopen(req);
+    body: str = str(resp.read().decode());
     if body {
         return json.loads(body);
     }
@@ -73,8 +73,8 @@ def validate_provider(provider: str) -> dict {
     }
 }
 
+"""Repos of the demo account, with pushed_at for the staleness rule."""
 def list_repos() -> list {
-    """Repos of the demo account, with pushed_at for the staleness rule."""
     token: str = os.environ.get("GITHUB_TOKEN", "");
     user: str = os.environ.get("GITHUB_USERNAME", "syang0624");
     if _demo_mode() or not token {
@@ -114,8 +114,8 @@ def fetch_repos() -> list[dict] {
     return list_repos() as list[dict];
 }
 
+"""Shallow scan: manifest files plus parsed deps and env var names."""
 def fetch_manifests(repo: str) -> dict {
-    """Shallow scan: manifest files plus parsed deps and env var names."""
     token: str = os.environ.get("GITHUB_TOKEN", "");
     if _demo_mode() or not token {
         return _fixture_manifests(repo);
@@ -124,7 +124,7 @@ def fetch_manifests(repo: str) -> dict {
         contents: any = _get_json(f"https://api.github.com/repos/{repo}/contents", token, "application/vnd.github+json");
         manifest_files: list = [];
         for item in (contents as list) {
-            fname: str = (item as dict).get("name", "");
+            fname: str = str((item as dict).get("name", ""));
             if fname in ["package.json", "requirements.txt", ".env.example", "Pipfile"] {
                 manifest_files.append(fname);
             }
@@ -176,7 +176,7 @@ def fetch_manifests(repo: str) -> dict {
 def _fetch_file(repo: str, path: str, token: str) -> str {
     try {
         data: any = _get_json(f"https://api.github.com/repos/{repo}/contents/{path}", token, "application/vnd.github+json");
-        content: str = (data as dict).get("content", "");
+        content: str = str((data as dict).get("content", ""));
         if content {
             return base64.b64decode(content).decode();
         }
@@ -198,8 +198,8 @@ def list_supabase_projects() -> list {
     }
 }
 
+"""The one real execution of the demo. Demo mode simulates success."""
 def pause_project(ref: str) -> dict {
-    """The one real execution of the demo. Demo mode simulates success."""
     token: str = os.environ.get("SUPABASE_ACCESS_TOKEN", "");
     if _demo_mode() or not token {
         return {"status": "paused", "ref": ref, "demo_mode": True};
@@ -212,8 +212,8 @@ def pause_project(ref: str) -> dict {
     }
 }
 
+"""Undo for rehearsals and post-demo cleanup."""
 def restore_project(ref: str) -> dict {
-    """Undo for rehearsals and post-demo cleanup."""
     token: str = os.environ.get("SUPABASE_ACCESS_TOKEN", "");
     if _demo_mode() or not token {
         return {"status": "restoring", "ref": ref, "demo_mode": True};
@@ -257,8 +257,8 @@ def get_project_status(ref: str) -> dict {
     }
 }
 
+"""Org-level costs for the last 30 days. Needs an admin key (sk-admin-...)."""
 def get_openai_usage() -> dict {
-    """Org-level costs for the last 30 days. Needs an admin key (sk-admin-...)."""
     key: str = os.environ.get("OPENAI_ADMIN_KEY", "");
     if _demo_mode() or not key {
         fixture: dict = _fixture_openai_usage();
@@ -316,7 +316,7 @@ def _fixture_manifests(repo: str) -> dict {
             "env_vars": ["OPENAI_API_KEY", "OPENAI_MODEL"]
         }
     };
-    return fixtures.get(repo, {"repo": repo, "manifest_files": [], "deps": [], "env_vars": []});
+    return fixtures.get(repo, {"repo": repo, "manifest_files": [], "deps": [], "env_vars": []}) as dict;
 }
 
 def _fixture_supabase_projects() -> list {

@@ -1,4 +1,4 @@
-import from "radix-ui" { Progress as ProgressPrimitive }
+cl import from "radix-ui" { Progress as ProgressPrimitive }
 import from ...lib.utils { cn }
 
 def:pub Progress(props: any) -> JsxElement {

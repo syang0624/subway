@@ -1,4 +1,4 @@
-import from "radix-ui" { Separator as SeparatorPrimitive }
+cl import from "radix-ui" { Separator as SeparatorPrimitive }
 import from ...lib.utils { cn }
 
 def:pub Separator(props: any) -> JsxElement {

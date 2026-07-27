@@ -1,5 +1,5 @@
-import from "class-variance-authority" { cva }
-import from "radix-ui" { Slot }
+cl import from "class-variance-authority" { cva }
+cl import from "radix-ui" { Slot }
 import from ...lib.utils { cn }
 
 glob _badgeVariants: any = cva(

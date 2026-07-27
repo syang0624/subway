@@ -1,22 +1,22 @@
-import from ".ui.card" { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
-import from ".ui.button" { Button }
-import from ".ui.badge" { Badge }
-import from ".ui.separator" { Separator }
-import from ".ui.spinner" { Spinner }
-import from "..lib.utils" { cn }
-import from "@hugeicons/react" { HugeiconsIcon }
-import from "@hugeicons/core-free-icons" {
+cl import from ".ui.card" { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
+cl import from ".ui.button" { Button }
+cl import from ".ui.badge" { Badge }
+cl import from ".ui.separator" { Separator }
+cl import from ".ui.spinner" { Spinner }
+cl import from "..lib.utils" { cn }
+cl import from "@hugeicons/react" { HugeiconsIcon }
+cl import from "@hugeicons/core-free-icons" {
     CheckmarkCircle01Icon,
     Analytics01Icon,
     ArrowRight01Icon,
     InformationCircleIcon
 }
 
-sv import from ..backend.subway {
+sv import from backend.subway {
     GraphData, GraphNode, GraphEdge,
     Recommendation, RecommendationsData, ApproveResult
 }
-sv import from ..services.subway {
+sv import from services.subway {
     get_graph, get_recommendations, approve_action, verify_action
 }
 
@@ -417,7 +417,7 @@ def:pub GraphLayer(label: str, nodes: list[GraphNode], color_map: dict) -> JsxEl
 }
 
 def:pub GraphNodeChip(gnode: GraphNode, color_map: dict) -> JsxElement {
-    color_class: str = color_map.get(gnode.node_type, "bg-muted border-border text-foreground");
+    color_class: str = str(color_map.get(gnode.node_type, "bg-muted border-border text-foreground"));
     is_stale: bool = gnode.stale or gnode.idle_days > 0;
 
     return <div className={cn("relative flex items-center gap-2 rounded-lg border pl-3 pr-3 pt-2 pb-2 text-sm", color_class)}>
@@ -444,7 +444,7 @@ def:pub RecommendationCard(rec: Recommendation, status: str, approving: bool, ve
         "openai_rightsize": "Model Right-sizing",
         "unused_subscription": "Unused Subscription"
     };
-    type_label: str = type_labels.get(rec.rec_type, rec.rec_type);
+    type_label: str = str(type_labels.get(rec.rec_type, rec.rec_type));
 
     return <Card className={cn("transition-colors", is_approved and "border-primary/40 bg-primary/5" or "")}>
         <CardHeader>

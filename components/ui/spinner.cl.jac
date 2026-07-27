@@ -1,6 +1,6 @@
 import from ...lib.utils { cn }
-import from "@hugeicons/react" { HugeiconsIcon }
-import from "@hugeicons/core-free-icons" { Loading03Icon }
+cl import from "@hugeicons/react" { HugeiconsIcon }
+cl import from "@hugeicons/core-free-icons" { Loading03Icon }
 
 def:pub Spinner(props: any) -> JsxElement {
     return

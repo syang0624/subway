@@ -121,9 +121,9 @@ node Subscription {
 node RecommendationRecord {
     has stable_id: str;
     has rec_type: str;
-    has executable: bool = False;
     has title: str;
     has target_service: str;
+    has executable: bool = False;
     has target_ref: str = "";
     has affected_projects: list[str] = [];
     has monthly_savings_usd: int = 0;
@@ -225,9 +225,7 @@ def _safety_checks(
             if len(generated) > 0 {
                 return generated;
             }
-        } except Exception {
-            pass;
-        }
+        } except Exception {}
     }
     return _fallback_safety_checks(
         recommendation,

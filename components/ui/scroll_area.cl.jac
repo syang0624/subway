@@ -1,4 +1,4 @@
-import from "radix-ui" { ScrollArea as ScrollAreaPrimitive }
+cl import from "radix-ui" { ScrollArea as ScrollAreaPrimitive }
 import from ...lib.utils { cn }
 
 def:pub ScrollArea(props: any) -> JsxElement {

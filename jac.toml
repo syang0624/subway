@@ -6,6 +6,13 @@ version = "0.1.0"
 base_route_app = "app"
 
 [dependencies.npm]
+"react-router-dom" = "latest"
+"react-error-boundary" = "latest"
+"react-hook-form" = "latest"
+"@hookform/resolvers" = "latest"
+zod = "latest"
+react = "latest"
+"react-dom" = "latest"
 "@hugeicons/react" = "latest"
 "@hugeicons/core-free-icons" = "latest"
 "class-variance-authority" = "latest"
