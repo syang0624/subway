@@ -4,6 +4,7 @@ version = "0.1.0"
 
 [serve]
 base_route_app = "app"
+port = 8000
 
 [dependencies.npm]
 "react-router-dom" = "latest"
