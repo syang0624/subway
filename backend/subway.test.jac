@@ -1,21 +1,3 @@
-import from backend.subway {
-    _manifest_uses,
-    _is_paused,
-    ConnectionResult,
-    DiscoveryResult,
-    AnalysisResult,
-    GraphData,
-    RecommendationsData,
-    ApproveResult,
-    connect_accounts,
-    discover_stack,
-    analyze,
-    get_graph,
-    get_recommendations,
-    approve_action
-}
-
-
 test "manifest dependency detection is provider aware" {
     manifest: dict = {
         "deps": ["@supabase/supabase-js", "openai"],
@@ -60,4 +42,14 @@ test "approval rejects an unknown recommendation" {
     result = root spawn approve_action(rec_id="rec-missing");
     approval: ApproveResult = result.reports[0];
     assert approval.status == "not_found";
+}
+
+test "demo execution reaches provider verification" {
+    os.environ["DEMO_MODE"] = "true";
+    root spawn connect_accounts();
+    root spawn discover_stack();
+    root spawn analyze();
+    result = root spawn approve_action(rec_id="rec-001");
+    approval: ApproveResult = result.reports[0];
+    assert approval.status == "verified";
 }

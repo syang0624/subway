@@ -345,7 +345,11 @@ def _fixture_supabase_projects() -> list {
 }
 
 def _fixture_project_status(ref: str) -> dict {
-    if "legacy" in ref {
+    demo_project_ref: str = os.environ.get(
+        "SUPABASE_DEMO_PROJECT_REF",
+        "legacy-api-db-ref0"
+    );
+    if "legacy" in ref or ref == demo_project_ref {
         return {
             "id": ref,
             "name": "legacy-api-db",

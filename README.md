@@ -106,8 +106,12 @@ analysis.
 For a deterministic offline run:
 
 ```bash
+jac clean --data --force
 DEMO_MODE=true jac dev
 ```
+
+The clean step resets only the local persisted demo graph so every rehearsal
+starts with proposed recommendations and an active pause target.
 
 ## Validation
 
@@ -115,7 +119,7 @@ Run the compiler and targeted backend tests:
 
 ```bash
 jac check main.jac
-jac test backend/subway.test.jac
+jac test backend/subway.jac
 ```
 
 Optional graph inspection:
@@ -143,4 +147,3 @@ a successful live API scan.
   request completed.
 - The overlapping pause and cancellation recommendations are counted only once
   in projected savings.
-

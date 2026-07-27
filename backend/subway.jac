@@ -801,7 +801,14 @@ walker:pub execute_action {
         has_live_token: bool = bool(
             os.environ.get("SUPABASE_ACCESS_TOKEN", "")
         );
-        if has_live_token and self.target_ref.endswith("-ref0") {
+        demo_mode: bool = (
+            os.environ.get("DEMO_MODE", "").lower() == "true"
+        );
+        if (
+            has_live_token
+            and self.target_ref.endswith("-ref0")
+            and not demo_mode
+        ) {
             self.result = ApproveResult(
                 id=self.rec_id,
                 status="configuration_error",

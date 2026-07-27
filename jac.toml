@@ -6,11 +6,16 @@ version = "0.1.0"
 base_route_app = "app"
 port = 8000
 
+[client.vite]
+plugins = ["tailwindcss()"]
+lib_imports = ["import tailwindcss from '@tailwindcss/vite'"]
+
 [dependencies.npm]
 "react-router-dom" = "latest"
 "react-error-boundary" = "latest"
 "react-hook-form" = "latest"
 "@hookform/resolvers" = "latest"
+"@tanstack/react-form" = "^1.33.0"
 zod = "latest"
 react = "latest"
 "react-dom" = "latest"
